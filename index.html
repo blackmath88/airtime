@@ -28,7 +28,7 @@
     .clock{text-align:right;font-variant-numeric:tabular-nums}
     .clock strong{display:block;font-size:1.15rem}
     .clock span{font-size:.8rem;color:var(--muted)}
-    .hero{background:var(--ink);color:#fff;border-radius:30px;padding:22px;display:grid;grid-template-columns:1.5fr .8fr;gap:22px;margin-bottom:16px}
+    .hero{background:var(--ink);color:#fff;border-radius:26px;padding:18px;display:grid;grid-template-columns:1.5fr .8fr;gap:18px;margin-bottom:16px}
     .phase-kicker{font-size:.78rem;color:#bdb8b0;text-transform:uppercase;letter-spacing:.12em}
     .phase-title{font-size:clamp(1.6rem,5vw,3rem);line-height:1;margin:.45rem 0}
     .phase-objective{color:#d6d2ca;max-width:42rem}
@@ -40,6 +40,8 @@
     .progress-ring{position:relative}
     .progress-ring span{position:relative;font-weight:700;font-size:1.5rem}
     .controls{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:10px}
+    .phase-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .phase-tools .btn{padding:11px 13px}
     .btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:14px 16px;border-radius:16px;font-weight:700}
     .btn.primary{background:var(--accent);color:#fff;border-color:transparent}
     .btn.dark{background:#2d2d2d;color:white;border-color:#454545}
@@ -48,7 +50,7 @@
     .panel{background:rgba(251,250,247,.86);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
     .panel h2{font-size:1rem;margin:0 0 14px}
     .timeline{display:grid;gap:8px}
-    .phase-row{display:grid;grid-template-columns:74px 1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid transparent;border-radius:16px}
+    .phase-row{width:100%;text-align:left;display:grid;grid-template-columns:74px 1fr auto;gap:12px;align-items:center;padding:14px;border:1px solid transparent;border-radius:16px;background:transparent;color:inherit}
     .phase-row.active{background:#fff;border-color:var(--line)}
     .phase-row.done{opacity:.55}
     .phase-time{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.84rem}
@@ -57,9 +59,9 @@
     .badge{font-size:.72rem;padding:5px 8px;border-radius:999px;background:#e8e2d9;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
     .badge.active{background:var(--accent);color:white}
     .task-list{display:grid;gap:10px}
-    .task{display:flex;gap:10px;align-items:flex-start}
-    .task input{margin-top:3px}
-    .task label{line-height:1.35}
+    .task{display:flex;gap:12px;align-items:flex-start;padding:9px 0}
+    .task input{width:24px;height:24px;min-width:24px;margin:0;accent-color:var(--accent)}
+    .task label{line-height:1.4;font-size:1rem;padding-top:1px}
     .decision{border-left:4px solid var(--warn);padding:12px 14px;background:#f4eadf;border-radius:12px;margin-top:14px}
     .stop{border-left-color:var(--danger);background:#f3e2df}
     .ok{border-left-color:var(--ok);background:#e4eee8}
@@ -76,12 +78,32 @@
     .mini{font-size:.8rem;color:var(--muted)}
     .install{display:none}
     @media(max-width:760px){
+      .app{padding:10px 10px 72px}
+      .topbar{margin-bottom:12px;align-items:flex-end}
+      .eyebrow{font-size:.68rem}
+      h1{font-size:2rem}
+      .subtitle{font-size:.9rem}
+      .clock strong{font-size:1rem}
       .hero,.grid{grid-template-columns:1fr}
-      .hero-side{display:grid;grid-template-columns:120px 1fr;align-items:center}
+      .hero{padding:16px;border-radius:22px}
+      .hero-side{display:flex;flex-direction:column}
+      .progress-ring{display:none}
+      .timer{font-size:4.5rem;margin:.9rem 0}
+      .timer-sub{gap:8px;font-size:.78rem}
       .controls{grid-template-columns:1fr 1fr}
-      .controls .primary{grid-column:1/-1}
+      .controls .primary{grid-column:1/-1;padding:17px 16px;font-size:1.05rem}
+      .controls .ghost{padding:14px 12px}
+      .panel{padding:15px;border-radius:18px}
+      .grid{gap:12px}
+      .phase-row{grid-template-columns:60px 1fr auto;padding:13px 10px}
+      .phase-time{font-size:.76rem}
+      .phase-meta{display:none}
+      .task{padding:11px 0}
+      .task input{width:28px;height:28px;min-width:28px}
+      .task label{font-size:1.03rem}
       .feedback{grid-template-columns:1fr}
-      .topbar{align-items:flex-end}
+      .footer-actions{display:grid;grid-template-columns:1fr 1fr}
+      .footer-actions .btn{width:100%}
     }
   </style>
 </head>
@@ -114,9 +136,13 @@
     <div class="hero-side">
       <div class="progress-ring" id="progressRing"><span id="progressText">0%</span></div>
       <div class="controls">
-        <button class="btn primary" id="mainAction">Start session</button>
+        <button class="btn primary" id="mainAction">Start phase</button>
         <button class="btn ghost" id="prevPhase">Previous</button>
         <button class="btn ghost" id="nextPhase">Next</button>
+      </div>
+      <div class="phase-tools">
+        <button class="btn dark" id="resetPhase">Reset phase timer</button>
+        <button class="btn dark" id="completePhase">Complete phase</button>
       </div>
     </div>
   </section>
@@ -200,16 +226,14 @@
 const DEFAULT_SESSION = {"schemaVersion": "1.0", "id": "controlled-hard-climbing-2026-07-30", "title": "Controlled Hard Climbing", "subtitle": "Hard stimulus, clean movement, no compensation", "date": "2026-07-30", "plannedDurationMin": 90, "context": ["Tuesday football added unfamiliar leg and cardio load.", "Wednesday was skipped due to poor sleep and numbness.", "Today is serious training, but not a maximal board benchmark day.", "Week 1 priority: calibration, recruitment, timing and confidence."], "successCriteria": ["Fingers healthy", "Right mid-back remains quiet", "No exhaustion", "Confidence slightly higher than at arrival"], "phases": [{"id": "warmup", "name": "Full warm-up", "shortName": "Warm-up", "startMin": 0, "endMin": 15, "type": "warmup", "objective": "Prepare fully and test the right mid-back before loading.", "tasks": ["3\u20134 min general movement", "Shoulders, scapulae and wrists", "Finger curls with light resistance", "Easy hangs on large edges", "4\u20136 easy commercial boulders, gradually increasing difficulty"], "checks": ["Deep breath", "Arms overhead", "Gentle rotation both ways", "Easy pulling", "One controlled drop-down"], "decisionRule": "If the right mid-back stays completely quiet, proceed. If it returns, switch to easy commercial climbing and skip the board."}, {"id": "board", "name": "Hard but controlled board climbing", "shortName": "Board", "startMin": 15, "endMin": 55, "type": "main", "objective": "One useful hard-board stimulus without benchmark chasing.", "tasks": ["Choose Kilter or Tension Board\u2014whichever feels more predictable", "2\u20133 easy board problems", "2 moderate problems", "Choose 3\u20134 serious problems", "Stay around current 6B\u20136C territory", "3\u20134 quality attempts per hard problem", "Rest 2\u20134 minutes between attempts", "Analyse one thing between attempts"], "targets": ["Send one problem that requires effort", "OR make meaningful progress on two harder problems"], "stopConditions": ["Contact strength clearly falls", "Feet repeatedly cut for no technical reason", "The same move gets worse across attempts", "Fingers, elbows or back begin talking", "You start compensating because Wednesday was missed"], "coachingNote": "Failing whites or old Kilter grades is not evidence that strength disappeared. Today is about restoring recruitment, timing and confidence."}, {"id": "commercial", "name": "Commercial climbing / movement volume", "shortName": "Movement", "startMin": 55, "endMin": 72, "type": "volume", "objective": "Add movement variety without more limit pulling.", "tasks": ["3\u20135 reds or yellows", "Prefer styles different from the board", "Clean climbing, not survival attempts"]}, {"id": "finisher", "name": "Short physique finisher", "shortName": "Finisher", "startMin": 72, "endMin": 84, "type": "strength", "objective": "Small push/core dose only.", "tasks": ["Deep push-ups: 3 \u00d7 8\u201310", "Controlled depth", "Leave 1\u20132 reps in reserve", "Core: hanging knee raises 3 \u00d7 8\u201310 only if back remains quiet", "Alternative: dead bugs 3 \u00d7 8 each side"], "avoid": ["No additional pull-ups", "No weighted pulling"]}, {"id": "downshift", "name": "Downshift", "shortName": "Downshift", "startMin": 84, "endMin": 90, "type": "cooldown", "objective": "Leave composed, not depleted.", "tasks": ["Walk and shake out forearms", "Gentle chest opening", "Relaxed breathing"], "avoid": ["No bridge", "No deep backbend", "No hard split stretching"]}]};
 let plan = DEFAULT_SESSION;
 let state = {
-  running:false,
-  startedAt:null,
-  pausedAt:null,
-  pauseAccumulatedMs:0,
   phaseIndex:0,
+  phaseTimers:{},
   completedTasks:{},
   notes:"",
   energy:"",
   back:"",
   fingers:"",
+  sessionStartedAt:null,
   finishedAt:null
 };
 let deferredPrompt = null;
@@ -220,23 +244,31 @@ const fmt = sec => {
   return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0');
 };
 const nowMs = () => Date.now();
-const elapsedSec = () => {
-  if (!state.startedAt) return 0;
-  const end = state.running ? nowMs() : (state.pausedAt || nowMs());
-  return Math.max(0, (end - state.startedAt - state.pauseAccumulatedMs)/1000);
-};
 const phase = () => plan.phases[state.phaseIndex];
+const timerFor = (id) => {
+  if(!state.phaseTimers[id]){
+    state.phaseTimers[id] = {running:false, startedAt:null, pausedAt:null, accumulatedMs:0, completed:false};
+  }
+  return state.phaseTimers[id];
+};
+const phaseElapsedSec = (p = phase()) => {
+  const t = timerFor(p.id);
+  let ms = t.accumulatedMs || 0;
+  if(t.running && t.startedAt) ms += nowMs() - t.startedAt;
+  return Math.max(0, ms / 1000);
+};
+const totalElapsedSec = () => plan.phases.reduce((sum,p)=>sum + phaseElapsedSec(p),0);
 
 function save(){
   state.notes = $('#notes').value;
   state.energy = $('#energy').value;
   state.back = $('#back').value;
   state.fingers = $('#fingers').value;
-  localStorage.setItem('climb-session-state', JSON.stringify({plan,state}));
+  localStorage.setItem('climb-session-state-v2', JSON.stringify({plan,state}));
 }
 function load(){
   try{
-    const saved = JSON.parse(localStorage.getItem('climb-session-state'));
+    const saved = JSON.parse(localStorage.getItem('climb-session-state-v2'));
     if(saved?.plan && saved?.state){ plan=saved.plan; state=saved.state; }
   }catch(e){}
 }
@@ -255,12 +287,13 @@ function renderTimeline(){
   const el = $('#timeline'); el.innerHTML='';
   plan.phases.forEach((p,i)=>{
     const row=document.createElement('button');
-    row.className='phase-row'+(i===state.phaseIndex?' active':'')+(i<state.phaseIndex?' done':'');
+    const pt = timerFor(p.id);
+    row.className='phase-row'+(i===state.phaseIndex?' active':'')+(pt.completed?' done':'');
     row.type='button';
     row.innerHTML=`<div class="phase-time">${p.startMin}–${p.endMin} min</div>
       <div><div class="phase-name">${p.shortName||p.name}</div><div class="phase-meta">${p.objective||''}</div></div>
-      <span class="badge ${i===state.phaseIndex?'active':''}">${i<state.phaseIndex?'done':i===state.phaseIndex?'now':'next'}</span>`;
-    row.addEventListener('click',()=>{state.phaseIndex=i;renderPhase();renderTimeline();save();});
+      <span class="badge ${i===state.phaseIndex?'active':''}">${pt.completed?'done':i===state.phaseIndex?'now':phaseElapsedSec(p)>0?'paused':'ready'}</span>`;
+    row.addEventListener('click',()=>{pauseCurrentPhase();state.phaseIndex=i;renderPhase();renderTimeline();save();tick();});
     el.appendChild(row);
   });
 }
@@ -305,33 +338,54 @@ function tick(){
   const d=new Date();
   $('#liveClock').textContent=d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
   $('#liveDate').textContent=d.toLocaleDateString([], {weekday:'short',day:'2-digit',month:'short'});
-  const total=elapsedSec();
   const p=phase();
-  const phaseStart=p.startMin*60;
-  const phaseDuration=(p.endMin-p.startMin)*60;
-  const phaseElapsed=Math.max(0,total-phaseStart);
-  const remaining=Math.max(0,phaseDuration-phaseElapsed);
+  const t=timerFor(p.id);
+  const elapsed=phaseElapsedSec(p);
+  const target=(p.endMin-p.startMin)*60;
+  const remaining=Math.max(0,target-elapsed);
   $('#timer').textContent=fmt(remaining);
-  $('#sessionElapsed').textContent='Session '+fmt(total);
-  const pct=Math.min(100,(total/(plan.plannedDurationMin*60))*100);
+  $('#sessionElapsed').textContent='Total active '+fmt(totalElapsedSec());
+  const pct=Math.min(100,(elapsed/target)*100);
   $('#progressRing').style.setProperty('--progress',pct+'%');
   $('#progressText').textContent=Math.round(pct)+'%';
-  $('#statusText').textContent=state.finishedAt?'Finished':state.running?'Running':state.startedAt?'Paused':'Not started';
-  $('#mainAction').textContent=!state.startedAt?'Start session':state.running?'Pause':'Resume';
-  if(state.running && total >= p.endMin*60 && state.phaseIndex < plan.phases.length-1){
-    state.phaseIndex++;
-    renderPhase();
-    save();
-  }
+  $('#statusText').textContent=t.completed?'Completed':t.running?'Phase running':elapsed>0?'Phase paused':'Not started';
+  $('#mainAction').textContent=t.running?'Pause phase':elapsed>0?'Resume phase':'Start phase';
 }
 $('#mainAction').addEventListener('click',()=>{
-  if(!state.startedAt){state.startedAt=nowMs();state.running=true;}
-  else if(state.running){state.running=false;state.pausedAt=nowMs();}
-  else{state.pauseAccumulatedMs += nowMs()-state.pausedAt;state.pausedAt=null;state.running=true;}
-  save();tick();
+  const t=timerFor(phase().id);
+  if(!state.sessionStartedAt) state.sessionStartedAt=nowMs();
+  if(t.running){
+    t.accumulatedMs += nowMs()-t.startedAt;
+    t.startedAt=null;
+    t.running=false;
+  }else{
+    t.startedAt=nowMs();
+    t.running=true;
+    t.completed=false;
+  }
+  save();tick();renderTimeline();
 });
-$('#prevPhase').addEventListener('click',()=>{if(state.phaseIndex>0){state.phaseIndex--;renderPhase();save();}});
-$('#nextPhase').addEventListener('click',()=>{if(state.phaseIndex<plan.phases.length-1){state.phaseIndex++;renderPhase();save();}});
+function pauseCurrentPhase(){
+  const t=timerFor(phase().id);
+  if(t.running){
+    t.accumulatedMs += nowMs()-t.startedAt;
+    t.startedAt=null;
+    t.running=false;
+  }
+}
+$('#prevPhase').addEventListener('click',()=>{if(state.phaseIndex>0){pauseCurrentPhase();state.phaseIndex--;renderPhase();save();tick();}});
+$('#nextPhase').addEventListener('click',()=>{if(state.phaseIndex<plan.phases.length-1){pauseCurrentPhase();state.phaseIndex++;renderPhase();save();tick();}});
+$('#resetPhase').addEventListener('click',()=>{
+  const t=timerFor(phase().id);
+  t.running=false;t.startedAt=null;t.accumulatedMs=0;t.completed=false;
+  save();tick();renderTimeline();
+});
+$('#completePhase').addEventListener('click',()=>{
+  const t=timerFor(phase().id);
+  if(t.running){t.accumulatedMs += nowMs()-t.startedAt;}
+  t.running=false;t.startedAt=null;t.completed=true;
+  save();tick();renderTimeline();
+});
 $('#notes').addEventListener('input',save);
 ['energy','back','fingers'].forEach(id=>$('#'+id).addEventListener('change',save));
 
@@ -354,8 +408,9 @@ function buildReport(){
     sessionId:plan.id,
     title:plan.title,
     plannedDurationMin:plan.plannedDurationMin,
-    actualDurationMin:Number((elapsedSec()/60).toFixed(1)),
-    startedAt:state.startedAt?new Date(state.startedAt).toISOString():null,
+    actualDurationMin:Number((totalElapsedSec()/60).toFixed(1)),
+    startedAt:state.sessionStartedAt?new Date(state.sessionStartedAt).toISOString():null,
+    phaseDurationsMin:Object.fromEntries(plan.phases.map(p=>[p.id,Number((phaseElapsedSec(p)/60).toFixed(1))])),
     finishedAt:state.finishedAt?new Date(state.finishedAt).toISOString():null,
     phaseReached:phase().name,
     feedback:{energy:state.energy, rightMidBack:state.back, fingers:state.fingers},
@@ -365,7 +420,7 @@ function buildReport(){
   };
 }
 $('#finishSession').addEventListener('click',()=>{
-  state.running=false;state.pausedAt=nowMs();state.finishedAt=nowMs();save();
+  pauseCurrentPhase();state.finishedAt=nowMs();save();
   $('#reportOutput').value=JSON.stringify(buildReport(),null,2);
   $('#reportDialog').showModal();tick();
 });
@@ -377,9 +432,9 @@ $('#downloadReport').addEventListener('click',()=>{
 });
 $('#resetSession').addEventListener('click',()=>{
   if(confirm('Reset all timing, notes and checkmarks?')){
-    localStorage.removeItem('climb-session-state');
+    localStorage.removeItem('climb-session-state-v2');
     plan=DEFAULT_SESSION;
-    state={running:false,startedAt:null,pausedAt:null,pauseAccumulatedMs:0,phaseIndex:0,completedTasks:{},notes:"",energy:"",back:"",fingers:"",finishedAt:null};
+    state={phaseIndex:0,phaseTimers:{},completedTasks:{},notes:"",energy:"",back:"",fingers:"",sessionStartedAt:null,finishedAt:null};
     renderStatic();tick();
   }
 });
