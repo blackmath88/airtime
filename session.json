@@ -1,0 +1,130 @@
+{
+  "schemaVersion": "1.0",
+  "id": "controlled-hard-climbing-2026-07-30",
+  "title": "Controlled Hard Climbing",
+  "subtitle": "Hard stimulus, clean movement, no compensation",
+  "date": "2026-07-30",
+  "plannedDurationMin": 90,
+  "context": [
+    "Tuesday football added unfamiliar leg and cardio load.",
+    "Wednesday was skipped due to poor sleep and numbness.",
+    "Today is serious training, but not a maximal board benchmark day.",
+    "Week 1 priority: calibration, recruitment, timing and confidence."
+  ],
+  "successCriteria": [
+    "Fingers healthy",
+    "Right mid-back remains quiet",
+    "No exhaustion",
+    "Confidence slightly higher than at arrival"
+  ],
+  "phases": [
+    {
+      "id": "warmup",
+      "name": "Full warm-up",
+      "shortName": "Warm-up",
+      "startMin": 0,
+      "endMin": 15,
+      "type": "warmup",
+      "objective": "Prepare fully and test the right mid-back before loading.",
+      "tasks": [
+        "3\u20134 min general movement",
+        "Shoulders, scapulae and wrists",
+        "Finger curls with light resistance",
+        "Easy hangs on large edges",
+        "4\u20136 easy commercial boulders, gradually increasing difficulty"
+      ],
+      "checks": [
+        "Deep breath",
+        "Arms overhead",
+        "Gentle rotation both ways",
+        "Easy pulling",
+        "One controlled drop-down"
+      ],
+      "decisionRule": "If the right mid-back stays completely quiet, proceed. If it returns, switch to easy commercial climbing and skip the board."
+    },
+    {
+      "id": "board",
+      "name": "Hard but controlled board climbing",
+      "shortName": "Board",
+      "startMin": 15,
+      "endMin": 55,
+      "type": "main",
+      "objective": "One useful hard-board stimulus without benchmark chasing.",
+      "tasks": [
+        "Choose Kilter or Tension Board\u2014whichever feels more predictable",
+        "2\u20133 easy board problems",
+        "2 moderate problems",
+        "Choose 3\u20134 serious problems",
+        "Stay around current 6B\u20136C territory",
+        "3\u20134 quality attempts per hard problem",
+        "Rest 2\u20134 minutes between attempts",
+        "Analyse one thing between attempts"
+      ],
+      "targets": [
+        "Send one problem that requires effort",
+        "OR make meaningful progress on two harder problems"
+      ],
+      "stopConditions": [
+        "Contact strength clearly falls",
+        "Feet repeatedly cut for no technical reason",
+        "The same move gets worse across attempts",
+        "Fingers, elbows or back begin talking",
+        "You start compensating because Wednesday was missed"
+      ],
+      "coachingNote": "Failing whites or old Kilter grades is not evidence that strength disappeared. Today is about restoring recruitment, timing and confidence."
+    },
+    {
+      "id": "commercial",
+      "name": "Commercial climbing / movement volume",
+      "shortName": "Movement",
+      "startMin": 55,
+      "endMin": 72,
+      "type": "volume",
+      "objective": "Add movement variety without more limit pulling.",
+      "tasks": [
+        "3\u20135 reds or yellows",
+        "Prefer styles different from the board",
+        "Clean climbing, not survival attempts"
+      ]
+    },
+    {
+      "id": "finisher",
+      "name": "Short physique finisher",
+      "shortName": "Finisher",
+      "startMin": 72,
+      "endMin": 84,
+      "type": "strength",
+      "objective": "Small push/core dose only.",
+      "tasks": [
+        "Deep push-ups: 3 \u00d7 8\u201310",
+        "Controlled depth",
+        "Leave 1\u20132 reps in reserve",
+        "Core: hanging knee raises 3 \u00d7 8\u201310 only if back remains quiet",
+        "Alternative: dead bugs 3 \u00d7 8 each side"
+      ],
+      "avoid": [
+        "No additional pull-ups",
+        "No weighted pulling"
+      ]
+    },
+    {
+      "id": "downshift",
+      "name": "Downshift",
+      "shortName": "Downshift",
+      "startMin": 84,
+      "endMin": 90,
+      "type": "cooldown",
+      "objective": "Leave composed, not depleted.",
+      "tasks": [
+        "Walk and shake out forearms",
+        "Gentle chest opening",
+        "Relaxed breathing"
+      ],
+      "avoid": [
+        "No bridge",
+        "No deep backbend",
+        "No hard split stretching"
+      ]
+    }
+  ]
+}

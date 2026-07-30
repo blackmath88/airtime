@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#171717">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Climb Session</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    :root{
+      --bg:#f2efe8;--ink:#171717;--muted:#69665f;--line:#d7d1c6;--paper:#fbfaf7;
+      --accent:#d96b3b;--ok:#416b55;--warn:#9a5b2d;--danger:#8d3a34;
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    html{background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{margin:0;min-height:100vh;background:
+      linear-gradient(180deg,rgba(255,255,255,.34),transparent 28rem),var(--bg)}
+    button,input,textarea,select{font:inherit}
+    button{cursor:pointer}
+    .app{max-width:980px;margin:0 auto;padding:18px 16px 80px}
+    .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
+    .eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700}
+    h1{font-size:clamp(1.8rem,5vw,3.2rem);line-height:.96;margin:.35rem 0 .55rem;letter-spacing:-.045em}
+    .subtitle{color:var(--muted);max-width:48rem}
+    .clock{text-align:right;font-variant-numeric:tabular-nums}
+    .clock strong{display:block;font-size:1.15rem}
+    .clock span{font-size:.8rem;color:var(--muted)}
+    .hero{background:var(--ink);color:#fff;border-radius:30px;padding:22px;display:grid;grid-template-columns:1.5fr .8fr;gap:22px;margin-bottom:16px}
+    .phase-kicker{font-size:.78rem;color:#bdb8b0;text-transform:uppercase;letter-spacing:.12em}
+    .phase-title{font-size:clamp(1.6rem,5vw,3rem);line-height:1;margin:.45rem 0}
+    .phase-objective{color:#d6d2ca;max-width:42rem}
+    .timer{font-size:clamp(3.4rem,12vw,7rem);line-height:.9;letter-spacing:-.06em;font-variant-numeric:tabular-nums;margin:1.2rem 0}
+    .timer-sub{display:flex;gap:14px;flex-wrap:wrap;color:#c7c1b8;font-size:.86rem}
+    .hero-side{display:flex;flex-direction:column;justify-content:space-between;gap:18px}
+    .progress-ring{width:100%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--accent) var(--progress,0%),#343434 0)}
+    .progress-ring::before{content:"";width:72%;height:72%;border-radius:50%;background:var(--ink);position:absolute}
+    .progress-ring{position:relative}
+    .progress-ring span{position:relative;font-weight:700;font-size:1.5rem}
+    .controls{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:10px}
+    .btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:14px 16px;border-radius:16px;font-weight:700}
+    .btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+    .btn.dark{background:#2d2d2d;color:white;border-color:#454545}
+    .btn.ghost{background:transparent;color:#fff;border-color:#555}
+    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+    .panel{background:rgba(251,250,247,.86);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+    .panel h2{font-size:1rem;margin:0 0 14px}
+    .timeline{display:grid;gap:8px}
+    .phase-row{display:grid;grid-template-columns:74px 1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid transparent;border-radius:16px}
+    .phase-row.active{background:#fff;border-color:var(--line)}
+    .phase-row.done{opacity:.55}
+    .phase-time{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.84rem}
+    .phase-name{font-weight:700}
+    .phase-meta{font-size:.82rem;color:var(--muted);margin-top:2px}
+    .badge{font-size:.72rem;padding:5px 8px;border-radius:999px;background:#e8e2d9;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+    .badge.active{background:var(--accent);color:white}
+    .task-list{display:grid;gap:10px}
+    .task{display:flex;gap:10px;align-items:flex-start}
+    .task input{margin-top:3px}
+    .task label{line-height:1.35}
+    .decision{border-left:4px solid var(--warn);padding:12px 14px;background:#f4eadf;border-radius:12px;margin-top:14px}
+    .stop{border-left-color:var(--danger);background:#f3e2df}
+    .ok{border-left-color:var(--ok);background:#e4eee8}
+    .notes{width:100%;min-height:110px;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;resize:vertical}
+    .feedback{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .feedback label{display:grid;gap:6px;font-size:.82rem;color:var(--muted)}
+    .feedback select{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff;color:var(--ink)}
+    .footer-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    dialog{border:none;border-radius:22px;padding:0;max-width:720px;width:calc(100% - 28px);background:var(--paper);color:var(--ink)}
+    dialog::backdrop{background:rgba(0,0,0,.56)}
+    .modal{padding:20px}
+    .modal textarea{width:100%;min-height:320px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8rem;border:1px solid var(--line);border-radius:14px;padding:12px}
+    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
+    .mini{font-size:.8rem;color:var(--muted)}
+    .install{display:none}
+    @media(max-width:760px){
+      .hero,.grid{grid-template-columns:1fr}
+      .hero-side{display:grid;grid-template-columns:120px 1fr;align-items:center}
+      .controls{grid-template-columns:1fr 1fr}
+      .controls .primary{grid-column:1/-1}
+      .feedback{grid-template-columns:1fr}
+      .topbar{align-items:flex-end}
+    }
+  </style>
+</head>
+<body>
+<main class="app">
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">Session instrument</div>
+      <h1 id="sessionTitle">Climb Session</h1>
+      <div class="subtitle" id="sessionSubtitle"></div>
+    </div>
+    <div class="clock">
+      <strong id="liveClock">--:--:--</strong>
+      <span id="liveDate"></span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <div class="phase-kicker" id="phaseKicker">Ready</div>
+      <div class="phase-title" id="phaseTitle">Warm-up</div>
+      <div class="phase-objective" id="phaseObjective"></div>
+      <div class="timer" id="timer">00:00</div>
+      <div class="timer-sub">
+        <span id="sessionElapsed">Session 00:00</span>
+        <span id="phaseWindow"></span>
+        <span id="statusText">Not started</span>
+      </div>
+    </div>
+    <div class="hero-side">
+      <div class="progress-ring" id="progressRing"><span id="progressText">0%</span></div>
+      <div class="controls">
+        <button class="btn primary" id="mainAction">Start session</button>
+        <button class="btn ghost" id="prevPhase">Previous</button>
+        <button class="btn ghost" id="nextPhase">Next</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div>
+      <div class="panel">
+        <h2>Current phase</h2>
+        <div id="taskList" class="task-list"></div>
+        <div id="phaseNotes"></div>
+      </div>
+
+      <div class="panel" style="margin-top:16px">
+        <h2>Session notes</h2>
+        <textarea class="notes" id="notes" placeholder="Moves, grades, attempts, body signals, adjustments…"></textarea>
+        <div class="feedback" style="margin-top:12px">
+          <label>Energy
+            <select id="energy">
+              <option value="">—</option><option>Low</option><option>Okay</option><option>Good</option><option>High</option>
+            </select>
+          </label>
+          <label>Right mid-back
+            <select id="back">
+              <option value="">—</option><option>Quiet</option><option>Noticeable</option><option>Painful</option>
+            </select>
+          </label>
+          <label>Finger state
+            <select id="fingers">
+              <option value="">—</option><option>Fresh</option><option>Loaded</option><option>Stop signal</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <aside>
+      <div class="panel">
+        <h2>Session timeline</h2>
+        <div class="timeline" id="timeline"></div>
+      </div>
+
+      <div class="panel" style="margin-top:16px">
+        <h2>Successful ending</h2>
+        <div id="successCriteria" class="task-list"></div>
+      </div>
+
+      <div class="footer-actions">
+        <button class="btn" id="finishSession">Finish & report</button>
+        <button class="btn" id="editJson">Edit JSON</button>
+        <button class="btn install" id="installBtn">Install app</button>
+        <button class="btn" id="resetSession">Reset</button>
+      </div>
+      <p class="mini">Runs from your device clock. State is saved locally and restored after reload.</p>
+    </aside>
+  </section>
+</main>
+
+<dialog id="jsonDialog">
+  <div class="modal">
+    <h2>Session JSON</h2>
+    <textarea id="jsonEditor"></textarea>
+    <div class="modal-actions">
+      <button class="btn" id="closeJson">Cancel</button>
+      <button class="btn primary" id="applyJson">Apply JSON</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="reportDialog">
+  <div class="modal">
+    <h2>Session report</h2>
+    <textarea id="reportOutput" readonly></textarea>
+    <div class="modal-actions">
+      <button class="btn" id="downloadReport">Download JSON</button>
+      <button class="btn primary" id="closeReport">Done</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+const DEFAULT_SESSION = {"schemaVersion": "1.0", "id": "controlled-hard-climbing-2026-07-30", "title": "Controlled Hard Climbing", "subtitle": "Hard stimulus, clean movement, no compensation", "date": "2026-07-30", "plannedDurationMin": 90, "context": ["Tuesday football added unfamiliar leg and cardio load.", "Wednesday was skipped due to poor sleep and numbness.", "Today is serious training, but not a maximal board benchmark day.", "Week 1 priority: calibration, recruitment, timing and confidence."], "successCriteria": ["Fingers healthy", "Right mid-back remains quiet", "No exhaustion", "Confidence slightly higher than at arrival"], "phases": [{"id": "warmup", "name": "Full warm-up", "shortName": "Warm-up", "startMin": 0, "endMin": 15, "type": "warmup", "objective": "Prepare fully and test the right mid-back before loading.", "tasks": ["3\u20134 min general movement", "Shoulders, scapulae and wrists", "Finger curls with light resistance", "Easy hangs on large edges", "4\u20136 easy commercial boulders, gradually increasing difficulty"], "checks": ["Deep breath", "Arms overhead", "Gentle rotation both ways", "Easy pulling", "One controlled drop-down"], "decisionRule": "If the right mid-back stays completely quiet, proceed. If it returns, switch to easy commercial climbing and skip the board."}, {"id": "board", "name": "Hard but controlled board climbing", "shortName": "Board", "startMin": 15, "endMin": 55, "type": "main", "objective": "One useful hard-board stimulus without benchmark chasing.", "tasks": ["Choose Kilter or Tension Board\u2014whichever feels more predictable", "2\u20133 easy board problems", "2 moderate problems", "Choose 3\u20134 serious problems", "Stay around current 6B\u20136C territory", "3\u20134 quality attempts per hard problem", "Rest 2\u20134 minutes between attempts", "Analyse one thing between attempts"], "targets": ["Send one problem that requires effort", "OR make meaningful progress on two harder problems"], "stopConditions": ["Contact strength clearly falls", "Feet repeatedly cut for no technical reason", "The same move gets worse across attempts", "Fingers, elbows or back begin talking", "You start compensating because Wednesday was missed"], "coachingNote": "Failing whites or old Kilter grades is not evidence that strength disappeared. Today is about restoring recruitment, timing and confidence."}, {"id": "commercial", "name": "Commercial climbing / movement volume", "shortName": "Movement", "startMin": 55, "endMin": 72, "type": "volume", "objective": "Add movement variety without more limit pulling.", "tasks": ["3\u20135 reds or yellows", "Prefer styles different from the board", "Clean climbing, not survival attempts"]}, {"id": "finisher", "name": "Short physique finisher", "shortName": "Finisher", "startMin": 72, "endMin": 84, "type": "strength", "objective": "Small push/core dose only.", "tasks": ["Deep push-ups: 3 \u00d7 8\u201310", "Controlled depth", "Leave 1\u20132 reps in reserve", "Core: hanging knee raises 3 \u00d7 8\u201310 only if back remains quiet", "Alternative: dead bugs 3 \u00d7 8 each side"], "avoid": ["No additional pull-ups", "No weighted pulling"]}, {"id": "downshift", "name": "Downshift", "shortName": "Downshift", "startMin": 84, "endMin": 90, "type": "cooldown", "objective": "Leave composed, not depleted.", "tasks": ["Walk and shake out forearms", "Gentle chest opening", "Relaxed breathing"], "avoid": ["No bridge", "No deep backbend", "No hard split stretching"]}]};
+let plan = DEFAULT_SESSION;
+let state = {
+  running:false,
+  startedAt:null,
+  pausedAt:null,
+  pauseAccumulatedMs:0,
+  phaseIndex:0,
+  completedTasks:{},
+  notes:"",
+  energy:"",
+  back:"",
+  fingers:"",
+  finishedAt:null
+};
+let deferredPrompt = null;
+
+const $ = s => document.querySelector(s);
+const fmt = sec => {
+  sec = Math.max(0, Math.floor(sec));
+  return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0');
+};
+const nowMs = () => Date.now();
+const elapsedSec = () => {
+  if (!state.startedAt) return 0;
+  const end = state.running ? nowMs() : (state.pausedAt || nowMs());
+  return Math.max(0, (end - state.startedAt - state.pauseAccumulatedMs)/1000);
+};
+const phase = () => plan.phases[state.phaseIndex];
+
+function save(){
+  state.notes = $('#notes').value;
+  state.energy = $('#energy').value;
+  state.back = $('#back').value;
+  state.fingers = $('#fingers').value;
+  localStorage.setItem('climb-session-state', JSON.stringify({plan,state}));
+}
+function load(){
+  try{
+    const saved = JSON.parse(localStorage.getItem('climb-session-state'));
+    if(saved?.plan && saved?.state){ plan=saved.plan; state=saved.state; }
+  }catch(e){}
+}
+function renderStatic(){
+  $('#sessionTitle').textContent = plan.title;
+  $('#sessionSubtitle').textContent = plan.subtitle || '';
+  $('#notes').value = state.notes || '';
+  $('#energy').value = state.energy || '';
+  $('#back').value = state.back || '';
+  $('#fingers').value = state.fingers || '';
+  renderTimeline();
+  renderPhase();
+  renderSuccess();
+}
+function renderTimeline(){
+  const el = $('#timeline'); el.innerHTML='';
+  plan.phases.forEach((p,i)=>{
+    const row=document.createElement('button');
+    row.className='phase-row'+(i===state.phaseIndex?' active':'')+(i<state.phaseIndex?' done':'');
+    row.type='button';
+    row.innerHTML=`<div class="phase-time">${p.startMin}–${p.endMin} min</div>
+      <div><div class="phase-name">${p.shortName||p.name}</div><div class="phase-meta">${p.objective||''}</div></div>
+      <span class="badge ${i===state.phaseIndex?'active':''}">${i<state.phaseIndex?'done':i===state.phaseIndex?'now':'next'}</span>`;
+    row.addEventListener('click',()=>{state.phaseIndex=i;renderPhase();renderTimeline();save();});
+    el.appendChild(row);
+  });
+}
+function renderPhase(){
+  const p=phase();
+  $('#phaseKicker').textContent=`Phase ${state.phaseIndex+1} of ${plan.phases.length}`;
+  $('#phaseTitle').textContent=p.name;
+  $('#phaseObjective').textContent=p.objective||'';
+  $('#phaseWindow').textContent=`Plan ${p.startMin}–${p.endMin} min`;
+  const tasks=[...(p.tasks||[]), ...(p.checks||[])];
+  const list=$('#taskList'); list.innerHTML='';
+  tasks.forEach((t,idx)=>{
+    const key=`${p.id}:${idx}`;
+    const wrap=document.createElement('div');
+    wrap.className='task';
+    wrap.innerHTML=`<input id="${key}" type="checkbox" ${state.completedTasks[key]?'checked':''}>
+      <label for="${key}">${t}</label>`;
+    wrap.querySelector('input').addEventListener('change',e=>{state.completedTasks[key]=e.target.checked;save();});
+    list.appendChild(wrap);
+  });
+  const notes=$('#phaseNotes');notes.innerHTML='';
+  const blocks=[];
+  if(p.decisionRule) blocks.push(['decision',p.decisionRule]);
+  if(p.targets) blocks.push(['ok','Good target: '+p.targets.join(' / ')]);
+  if(p.stopConditions) blocks.push(['stop','Stop when: '+p.stopConditions.join(' · ')]);
+  if(p.coachingNote) blocks.push(['decision',p.coachingNote]);
+  if(p.avoid) blocks.push(['stop',p.avoid.join(' · ')]);
+  blocks.forEach(([cls,txt])=>{const d=document.createElement('div');d.className=`decision ${cls}`;d.textContent=txt;notes.appendChild(d);});
+  renderTimeline();
+}
+function renderSuccess(){
+  const el=$('#successCriteria'); el.innerHTML='';
+  (plan.successCriteria||[]).forEach((t,i)=>{
+    const key=`success:${i}`;
+    const wrap=document.createElement('div');wrap.className='task';
+    wrap.innerHTML=`<input id="${key}" type="checkbox" ${state.completedTasks[key]?'checked':''}><label for="${key}">${t}</label>`;
+    wrap.querySelector('input').addEventListener('change',e=>{state.completedTasks[key]=e.target.checked;save();});
+    el.appendChild(wrap);
+  });
+}
+function tick(){
+  const d=new Date();
+  $('#liveClock').textContent=d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  $('#liveDate').textContent=d.toLocaleDateString([], {weekday:'short',day:'2-digit',month:'short'});
+  const total=elapsedSec();
+  const p=phase();
+  const phaseStart=p.startMin*60;
+  const phaseDuration=(p.endMin-p.startMin)*60;
+  const phaseElapsed=Math.max(0,total-phaseStart);
+  const remaining=Math.max(0,phaseDuration-phaseElapsed);
+  $('#timer').textContent=fmt(remaining);
+  $('#sessionElapsed').textContent='Session '+fmt(total);
+  const pct=Math.min(100,(total/(plan.plannedDurationMin*60))*100);
+  $('#progressRing').style.setProperty('--progress',pct+'%');
+  $('#progressText').textContent=Math.round(pct)+'%';
+  $('#statusText').textContent=state.finishedAt?'Finished':state.running?'Running':state.startedAt?'Paused':'Not started';
+  $('#mainAction').textContent=!state.startedAt?'Start session':state.running?'Pause':'Resume';
+  if(state.running && total >= p.endMin*60 && state.phaseIndex < plan.phases.length-1){
+    state.phaseIndex++;
+    renderPhase();
+    save();
+  }
+}
+$('#mainAction').addEventListener('click',()=>{
+  if(!state.startedAt){state.startedAt=nowMs();state.running=true;}
+  else if(state.running){state.running=false;state.pausedAt=nowMs();}
+  else{state.pauseAccumulatedMs += nowMs()-state.pausedAt;state.pausedAt=null;state.running=true;}
+  save();tick();
+});
+$('#prevPhase').addEventListener('click',()=>{if(state.phaseIndex>0){state.phaseIndex--;renderPhase();save();}});
+$('#nextPhase').addEventListener('click',()=>{if(state.phaseIndex<plan.phases.length-1){state.phaseIndex++;renderPhase();save();}});
+$('#notes').addEventListener('input',save);
+['energy','back','fingers'].forEach(id=>$('#'+id).addEventListener('change',save));
+
+$('#editJson').addEventListener('click',()=>{
+  $('#jsonEditor').value=JSON.stringify(plan,null,2);
+  $('#jsonDialog').showModal();
+});
+$('#closeJson').addEventListener('click',()=>$('#jsonDialog').close());
+$('#applyJson').addEventListener('click',()=>{
+  try{
+    const next=JSON.parse($('#jsonEditor').value);
+    if(!Array.isArray(next.phases)||!next.phases.length) throw new Error('phases missing');
+    plan=next; state.phaseIndex=0; renderStatic(); save(); $('#jsonDialog').close();
+  }catch(e){alert('Invalid session JSON: '+e.message);}
+});
+function buildReport(){
+  save();
+  return {
+    exportedAt:new Date().toISOString(),
+    sessionId:plan.id,
+    title:plan.title,
+    plannedDurationMin:plan.plannedDurationMin,
+    actualDurationMin:Number((elapsedSec()/60).toFixed(1)),
+    startedAt:state.startedAt?new Date(state.startedAt).toISOString():null,
+    finishedAt:state.finishedAt?new Date(state.finishedAt).toISOString():null,
+    phaseReached:phase().name,
+    feedback:{energy:state.energy, rightMidBack:state.back, fingers:state.fingers},
+    notes:state.notes,
+    completedTasks:state.completedTasks,
+    successCriteria:plan.successCriteria
+  };
+}
+$('#finishSession').addEventListener('click',()=>{
+  state.running=false;state.pausedAt=nowMs();state.finishedAt=nowMs();save();
+  $('#reportOutput').value=JSON.stringify(buildReport(),null,2);
+  $('#reportDialog').showModal();tick();
+});
+$('#closeReport').addEventListener('click',()=>$('#reportDialog').close());
+$('#downloadReport').addEventListener('click',()=>{
+  const blob=new Blob([JSON.stringify(buildReport(),null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`${plan.id}-report.json`;a.click();URL.revokeObjectURL(a.href);
+});
+$('#resetSession').addEventListener('click',()=>{
+  if(confirm('Reset all timing, notes and checkmarks?')){
+    localStorage.removeItem('climb-session-state');
+    plan=DEFAULT_SESSION;
+    state={running:false,startedAt:null,pausedAt:null,pauseAccumulatedMs:0,phaseIndex:0,completedTasks:{},notes:"",energy:"",back:"",fingers:"",finishedAt:null};
+    renderStatic();tick();
+  }
+});
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;$('#installBtn').style.display='inline-block';
+});
+$('#installBtn').addEventListener('click',async()=>{
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt=null;$('#installBtn').style.display='none';
+});
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));}
+load();renderStatic();tick();setInterval(tick,1000);setInterval(save,5000);
+</script>
+</body>
+</html>
